@@ -1,0 +1,30 @@
+.spl-wrapper {
+    margin: 1em auto;
+    text-align: center;
+}
+
+.spl-button {
+    -webkit-transition: all 0.15s ease;
+    transition: all 0.15s ease;
+}
+
+.spl-button.ajax-inactive {
+    display: none;
+}
+
+.spl-button.is-loading .spl-loading-anim {
+    display: block;
+}
+
+.spl-button.is-loading .spl-button-text {
+    display: none;
+}
+
+.spl-loading-anim {
+    display: none;
+}
+
+.spl-loading-icon {
+    width: 1.5em;
+    height: 1.5em;
+}
