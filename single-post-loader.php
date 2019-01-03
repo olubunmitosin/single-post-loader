@@ -43,3 +43,8 @@ function Single_Post_Loader () {
 }
 
 Single_Post_Loader();
+
+function show_loader_icon()
+{
+	return Single_Post_Loader()->build_animation();
+}

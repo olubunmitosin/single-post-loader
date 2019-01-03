@@ -45,8 +45,18 @@ try {
 
 (function ($) {
 
-    $(document).ready(function() {
-       //document.dispatchEvent(new window.CustomEvent('elm-fail'));
-    });
+    "use strict";
 
+    /**
+     * Append dynamically loaded Posts to the top of the loader
+     */
+    var waypoints = $('#loader-container').waypoint({
+        handler: function(direction) {
+            if (direction === 'down') {
+                //make ajax call to fetch next post
+
+                console.log(this.element.id + ' hit ' + direction);
+            }
+        }
+    });
 }(jQuery));

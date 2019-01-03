@@ -25,6 +25,10 @@
 }
 
 .spl-loading-icon {
-    width: 1.5em;
-    height: 1.5em;
+    width: 2.5em;
+    height: 2.5em;
+}
+
+.hide {
+    display: none;
 }

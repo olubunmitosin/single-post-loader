@@ -87,7 +87,7 @@ class Single_Post_Loader {
 	 * @param string $version
 	 */
 	public function __construct ( $file = '', $version = '1.0.0' ) {
-		define('SINGLE_POST_LOADER_SCRIPT_DEBUG', false);
+		define('SINGLE_POST_LOADER_SCRIPT_DEBUG', true);
 
 		$this->_version = $version;
 		$this->_token = 'single_post_loader';
@@ -146,8 +146,10 @@ class Single_Post_Loader {
 	 */
 	public function enqueue_scripts () {
 		if (!get_option('spl_disable')) {
-			wp_register_script( $this->_token . '-frontend', esc_url( $this->assets_url ) . 'js/frontend' . $this->script_suffix . '.js', array( 'jquery' ), $this->_version, true );
-			wp_enqueue_script( $this->_token . '-frontend' );
+			wp_enqueue_script( $this->_token . '-frontend-way', esc_url( $this->assets_url ) . 'js/jquery.waypoints' . $this->script_suffix . '.js', array( 'jquery' ), $this->_version, false );
+			wp_enqueue_script( $this->_token . '-frontend-way-debug', esc_url( $this->assets_url ) . 'js/waypoints.debug.js', array( 'jquery' ), $this->_version, false );
+			wp_enqueue_script( $this->_token . '-frontend', esc_url( $this->assets_url ) . 'js/frontend' . $this->script_suffix . '.js', array( 'jquery' ), $this->_version, true );
+//			wp_enqueue_script( $this->_token . '-frontend' );
 		}
 	} // End enqueue_scripts ()
 
@@ -160,7 +162,7 @@ class Single_Post_Loader {
 	public function localize_script () {
 		?>
 		<script type="text/javascript">
-            var spl_button_vars = { wrapper: '<?php echo get_option('spl_wrapper_selector'); ?>' };
+            var spl_loader_vars = { wrapper: '<?php echo get_option('spl_wrapper_selector'); ?>'};
 		</script>
 		<?php
 	} // End localize_script ()
@@ -261,136 +263,75 @@ class Single_Post_Loader {
 
 
 	/**
-	 * Generate the HTML for the loading icon
-	 * @access  public
-	 * @since   1.0.0
-	 * @return  string
+	 * @param $icon_option
+	 *
+	 * @return string
 	 */
-	public function build_loading_icon($icon_option) {
+	public function build_loading_icon ($icon_option) {
 
 		$html = '<div class="spl-loading-anim">' . "\n";
 
 		switch ($icon_option) {
 			case 'option_a':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve">' . "\n";
-				$html .= '  <path opacity="0.2" d="M20.201,5.169c-8.254,0-14.946,6.692-14.946,14.946c0,8.255,6.692,14.946,14.946,14.946 s14.946-6.691,14.946-14.946C35.146,11.861,28.455,5.169,20.201,5.169z M20.201,31.749c-6.425,0-11.634-5.208-11.634-11.634 c0-6.425,5.209-11.634,11.634-11.634c6.425,0,11.633,5.209,11.633,11.634C31.834,26.541,26.626,31.749,20.201,31.749z"/>' . "\n";
-				$html .= '  <path d="M26.013,10.047l1.654-2.866c-2.198-1.272-4.743-2.012-7.466-2.012h0v3.312h0 C22.32,8.481,24.301,9.057,26.013,10.047z">' . "\n";
-				$html .= '    <animateTransform attributeType="xml"' . "\n";
-				$html .= '      attributeName="transform"' . "\n";
-				$html .= '      type="rotate"' . "\n";
-				$html .= '      from="0 20 20"' . "\n";
-				$html .= '      to="360 20 20"' . "\n";
-				$html .= '      dur="0.5s"' . "\n";
-				$html .= '      repeatCount="indefinite"/>' . "\n";
-				$html .= '    </path>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve">'.
+                        '<path opacity="0.2" d="M20.201,5.169c-8.254,0-14.946,6.692-14.946,14.946c0,8.255,6.692,14.946,14.946,14.946 s14.946-6.691,14.946-14.946C35.146,11.861,28.455,5.169,20.201,5.169z M20.201,31.749c-6.425,0-11.634-5.208-11.634-11.634 c0-6.425,5.209-11.634,11.634-11.634c6.425,0,11.633,5.209,11.633,11.634C31.834,26.541,26.626,31.749,20.201,31.749z"/>'.
+                        '<path d="M26.013,10.047l1.654-2.866c-2.198-1.272-4.743-2.012-7.466-2.012h0v3.312h0 C22.32,8.481,24.301,9.057,26.013,10.047z">'.
+                        '<animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 20 20" to="360 20 20" dur="0.5s" repeatCount="indefinite"/>'.
+                        '</path>'.
+				        '</svg>';
 
 				break;
 
 			case 'option_b':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '  <path d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">' . "\n";
-				$html .= '    <animateTransform attributeType="xml"' . "\n";
-				$html .= '      attributeName="transform"' . "\n";
-				$html .= '      type="rotate"' . "\n";
-				$html .= '      from="0 25 25"' . "\n";
-				$html .= '      to="360 25 25"' . "\n";
-				$html .= '      dur="0.6s"' . "\n";
-				$html .= '      repeatCount="indefinite"/>' . "\n";
-				$html .= '    </path>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"> ' .
+                        '<path d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">'.
+                        '<animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"/>'.
+                        '</path>'.
+				        '</svg>';
 				break;
 
 			case 'option_c':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '  <path d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">' . "\n";
-				$html .= '    <animateTransform attributeType="xml"' . "\n";
-				$html .= '      attributeName="transform"' . "\n";
-				$html .= '      type="rotate"' . "\n";
-				$html .= '      from="0 25 25"' . "\n";
-				$html .= '      to="360 25 25"' . "\n";
-				$html .= '      dur="0.6s"' . "\n";
-				$html .= '      repeatCount="indefinite"/>' . "\n";
-				$html .= '    </path>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">'.
+                         '<path d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">'.
+                         '<animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"/>' .
+                         '</path>' .
+                         '</svg>';
 				break;
 
 			case 'option_d':
-				$html .= '  <svg class="spl-loading-icon" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">' . "\n";
-				$html .= '    <g fill="none" fill-rule="evenodd" stroke-width="2">' . "\n";
-				$html .= '        <circle cx="22" cy="22" r="1">' . "\n";
-				$html .= '            <animate attributeName="r"' . "\n";
-				$html .= '                begin="0s" dur="1.8s"' . "\n";
-				$html .= '                values="1; 20"' . "\n";
-				$html .= '                calcMode="spline"' . "\n";
-				$html .= '                keyTimes="0; 1"' . "\n";
-				$html .= '                keySplines="0.165, 0.84, 0.44, 1"' . "\n";
-				$html .= '                repeatCount="indefinite" />' . "\n";
-				$html .= '            <animate attributeName="stroke-opacity"' . "\n";
-				$html .= '                begin="0s" dur="1.8s"' . "\n";
-				$html .= '                values="1; 0"' . "\n";
-				$html .= '                calcMode="spline"' . "\n";
-				$html .= '                keyTimes="0; 1"' . "\n";
-				$html .= '                keySplines="0.3, 0.61, 0.355, 1"' . "\n";
-				$html .= '                repeatCount="indefinite" />' . "\n";
-				$html .= '        </circle>' . "\n";
-				$html .= '        <circle cx="22" cy="22" r="1">' . "\n";
-				$html .= '            <animate attributeName="r"' . "\n";
-				$html .= '                begin="-0.9s" dur="1.8s"' . "\n";
-				$html .= '                values="1; 20"' . "\n";
-				$html .= '                calcMode="spline"' . "\n";
-				$html .= '                keyTimes="0; 1"' . "\n";
-				$html .= '                keySplines="0.165, 0.84, 0.44, 1"' . "\n";
-				$html .= '                repeatCount="indefinite" />' . "\n";
-				$html .= '            <animate attributeName="stroke-opacity"' . "\n";
-				$html .= '                begin="-0.9s" dur="1.8s"' . "\n";
-				$html .= '                values="1; 0"' . "\n";
-				$html .= '                calcMode="spline"' . "\n";
-				$html .= '                keyTimes="0; 1"' . "\n";
-				$html .= '                keySplines="0.3, 0.61, 0.355, 1"' . "\n";
-				$html .= '                repeatCount="indefinite" />' . "\n";
-				$html .= '        </circle>' . "\n";
-				$html .= '    </g>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">'.
+                        '<g fill="none" fill-rule="evenodd" stroke-width="2">' .
+                        '<circle cx="22" cy="22" r="1">' .
+                        '<animate attributeName="r" begin="0s" dur="1.8s" values="1; 20" calcMode="spline" keyTimes="0; 1" keySplines="0.165, 0.84, 0.44, 1" repeatCount="indefinite" />' .
+                        '<animate attributeName="stroke-opacity" begin="0s" dur="1.8s" values="1; 0" calcMode="spline" keyTimes="0; 1" keySplines="0.3, 0.61, 0.355, 1" repeatCount="indefinite" />' .
+                        '</circle>' .
+                        '<circle cx="22" cy="22" r="1">' .
+                        '<animate attributeName="r" begin="-0.9s" dur="1.8s" values="1; 20" calcMode="spline" keyTimes="0; 1" keySplines="0.165, 0.84, 0.44, 1" repeatCount="indefinite" />' .
+                        '<animate attributeName="stroke-opacity" begin="-0.9s" dur="1.8s" values="1; 0" calcMode="spline" keyTimes="0; 1" keySplines="0.3, 0.61, 0.355, 1" repeatCount="indefinite" />' .
+                        '</circle>' .
+                        '</g>' .
+				        '</svg>';
 				break;
 
 			case 'option_e':
-				$html .= '  <svg class="spl-loading-icon" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">' . "\n";
-				$html .= '	    <circle cx="15" cy="15" r="15">' . "\n";
-				$html .= '	        <animate attributeName="r" from="9" to="9"' . "\n";
-				$html .= '	                 begin="0s" dur="0.8s"' . "\n";
-				$html .= '	                 values="9;15;9" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	        <animate attributeName="fill-opacity" from="0.5" to="0.5"' . "\n";
-				$html .= '	                 begin="0s" dur="0.8s"' . "\n";
-				$html .= '	                 values=".5;1;.5" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	    </circle>' . "\n";
-				$html .= '	    <circle cx="60" cy="15" r="9" fill-opacity="0.3">' . "\n";
-				$html .= '	        <animate attributeName="r" from="9" to="9"' . "\n";
-				$html .= '	                 begin="0.2s" dur="0.8s"' . "\n";
-				$html .= '	                 values="9;15;9" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	        <animate attributeName="fill-opacity" from="0.5" to="0.5"' . "\n";
-				$html .= '	                 begin="0.2s" dur="0.8s"' . "\n";
-				$html .= '	                 values=".5;1;.5" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	    </circle>' . "\n";
-				$html .= '	    <circle cx="105" cy="15" r="15">' . "\n";
-				$html .= '	        <animate attributeName="r" from="9" to="9"' . "\n";
-				$html .= '	                 begin="0.4s" dur="0.8s"' . "\n";
-				$html .= '	                 values="9;15;9" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	        <animate attributeName="fill-opacity" from="0.5" to="0.5"' . "\n";
-				$html .= '	                 begin="0.4s" dur="0.8s"' . "\n";
-				$html .= '	                 values=".5;1;.5" calcMode="linear"' . "\n";
-				$html .= '	                 repeatCount="indefinite" />' . "\n";
-				$html .= '	    </circle>' . "\n";
-				$html .= '	</svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">' .
+                        '<circle cx="15" cy="15" r="15">' .
+                        '<animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite" />' .
+                        '<animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite" />' .
+                        '</circle>' .
+				        '<circle cx="60" cy="15" r="9" fill-opacity="0.3">' .
+                        '<animate attributeName="r" from="9" to="9" begin="0.2s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite" />' .
+                        '<animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0.2s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite" />' .
+                        '</circle>' .
+                        '<circle cx="105" cy="15" r="15">' .
+                        '<animate attributeName="r" from="9" to="9" begin="0.4s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite" />' .
+                        '<animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0.4s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite" />' .
+                        '</circle>' .
+                        '</svg>';
 				break;
 
 			case 'option_f':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
+				$html .= ' <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
 				$html .= '    <rect x="0" y="0" width="4" height="7">' . "\n";
 				$html .= '      <animateTransform  attributeType="xml"' . "\n";
 				$html .= '        attributeName="transform" type="scale"' . "\n";
@@ -486,6 +427,13 @@ class Single_Post_Loader {
 
 		return $html;
 	}
+
+	public function build_animation()
+    {
+	    $loading_icon = get_option('spl_animation_icon');
+	    $html = $this->build_loading_icon ($loading_icon);
+	    return $html;
+    }
 
 
 }
