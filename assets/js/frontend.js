@@ -54,8 +54,27 @@ try {
         handler: function(direction) {
             if (direction === 'down') {
                 //make ajax call to fetch next post
-
-                console.log(this.element.id + ' hit ' + direction);
+                var postId = $('#loader-container').data('post');
+                var data = {
+                    action: 'splGetPostTemplate',
+                    nonce: spl_ajax_params.nonce,
+                    postID : postId
+                };
+                $.ajax({
+                    url : spl_ajax_params.ajaxUrl,
+                    type : 'POST',
+                    data : data,
+                    dataType: 'Text',
+                    success : function (resp) {
+                        if ( postId.length > 0 ){
+                            $('#loader-container').before(resp);
+                        }
+                    },
+                    error : function (error) {
+                        console.log(error);
+                    }
+                });
+                // console.log(this.element.id + ' hit ' + direction);
             }
         }
     });

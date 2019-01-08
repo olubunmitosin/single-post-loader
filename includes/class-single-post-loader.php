@@ -105,7 +105,7 @@ class Single_Post_Loader {
 		// Load frontend JS & CSS
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
-		add_action( 'wp_print_footer_scripts', array( $this, 'localize_script'), 99 );
+//		add_action( 'wp_enqueue_scripts', array( $this, 'localize_script'), 99 );
 
 		// Load admin CSS
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_styles' ), 10, 1 );
@@ -149,23 +149,20 @@ class Single_Post_Loader {
 			wp_enqueue_script( $this->_token . '-frontend-way', esc_url( $this->assets_url ) . 'js/jquery.waypoints' . $this->script_suffix . '.js', array( 'jquery' ), $this->_version, false );
 			wp_enqueue_script( $this->_token . '-frontend-way-debug', esc_url( $this->assets_url ) . 'js/waypoints.debug.js', array( 'jquery' ), $this->_version, false );
 			wp_enqueue_script( $this->_token . '-frontend', esc_url( $this->assets_url ) . 'js/frontend' . $this->script_suffix . '.js', array( 'jquery' ), $this->_version, true );
-//			wp_enqueue_script( $this->_token . '-frontend' );
+			//Get the protocol of the current page
+			$protocol   = isset ( $_SERVER['HTTPS'] ) ? 'https://' : 'http://';
+			// Set the ajax-url Parameter which will be output right before
+			// our configuration.js file so we can use ajax-url
+			$params     = array (
+				// Get the url to the admin-ajax.php file using admin_url()
+				'ajaxUrl' =>  admin_url( 'admin-ajax.php', $protocol),
+				'nonce' => wp_create_nonce( 'spl_ajax_verify_'. 2074),
+				'spl_loader_wrapper' => get_option('spl_wrapper_selector')
+			);
+			// Print the script to our page
+			wp_localize_script( $this->_token . '-frontend', 'spl_ajax_params', $params );
 		}
 	} // End enqueue_scripts ()
-
-	/**
-	 * Load frontend Javascript.
-	 * @access  public
-	 * @since   1.0.1
-	 * @return  void
-	 */
-	public function localize_script () {
-		?>
-		<script type="text/javascript">
-            var spl_loader_vars = { wrapper: '<?php echo get_option('spl_wrapper_selector'); ?>'};
-		</script>
-		<?php
-	} // End localize_script ()
 
 	/**
 	 * @param string $hook
@@ -331,95 +328,68 @@ class Single_Post_Loader {
 				break;
 
 			case 'option_f':
-				$html .= ' <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '    <rect x="0" y="0" width="4" height="7">' . "\n";
-				$html .= '      <animateTransform  attributeType="xml"' . "\n";
-				$html .= '        attributeName="transform" type="scale"' . "\n";
-				$html .= '        values="1,1; 1,3; 1,1"' . "\n";
-				$html .= '        begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="10" y="0" width="4" height="7">' . "\n";
-				$html .= '      <animateTransform  attributeType="xml"' . "\n";
-				$html .= '        attributeName="transform" type="scale"' . "\n";
-				$html .= '        values="1,1; 1,3; 1,1"' . "\n";
-				$html .= '        begin="0.2s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="20" y="0" width="4" height="7">' . "\n";
-				$html .= '      <animateTransform  attributeType="xml"' . "\n";
-				$html .= '        attributeName="transform" type="scale"' . "\n";
-				$html .= '        values="1,1; 1,3; 1,1"' . "\n";
-				$html .= '        begin="0.4s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 50 50;" xml:space="preserve">' .
+                        '<rect x="0" y="0" width="4" height="7">' .
+                        '<animateTransform  attributeType="xml" attributeName="transform" type="scale" values="1,1; 1,3; 1,1" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="10" y="0" width="4" height="7">' .
+                        '<animateTransform  attributeType="xml" attributeName="transform" type="scale" values="1,1; 1,3; 1,1" begin="0.2s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="20" y="0" width="4" height="7">' .
+                        '<animateTransform  attributeType="xml" attributeName="transform" type="scale" values="1,1; 1,3; 1,1" begin="0.4s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+				        '</svg>';
 				break;
 
 			case 'option_g':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '    <rect x="0" y="13" width="4" height="5">' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML"' . "\n";
-				$html .= '        values="5;21;5" ' . "\n";
-				$html .= '        begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="y" attributeType="XML"' . "\n";
-				$html .= '        values="13; 5; 13"' . "\n";
-				$html .= '        begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="10" y="13" width="4" height="5">' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML"' . "\n";
-				$html .= '        values="5;21;5" ' . "\n";
-				$html .= '        begin="0.15s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="y" attributeType="XML"' . "\n";
-				$html .= '        values="13; 5; 13"' . "\n";
-				$html .= '        begin="0.15s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="20" y="13" width="4" height="5">' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML"' . "\n";
-				$html .= '        values="5;21;5" ' . "\n";
-				$html .= '        begin="0.3s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="y" attributeType="XML"' . "\n";
-				$html .= '        values="13; 5; 13"' . "\n";
-				$html .= '        begin="0.3s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' .
+                        '<rect x="0" y="13" width="4" height="5">' .
+                        '<animate attributeName="height" attributeType="XML" values="5;21;5" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="13; 5; 13" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="10" y="13" width="4" height="5">' .
+                        '<animate attributeName="height" attributeType="XML" values="5;21;5"  begin="0.15s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="13; 5; 13" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="20" y="13" width="4" height="5"> '.
+                        '<animate attributeName="height" attributeType="XML" values="5;21;5" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="13; 5; 13" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+				        '</svg>';
 				break;
 
 			case 'option_h':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '    <rect x="0" y="0" width="4" height="20">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML"' . "\n";
-				$html .= '        values="1; .2; 1" ' . "\n";
-				$html .= '        begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="7" y="0" width="4" height="20">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML"' . "\n";
-				$html .= '        values="1; .2; 1" ' . "\n";
-				$html .= '        begin="0.2s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="14" y="0" width="4" height="20">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML"' . "\n";
-				$html .= '        values="1; .2; 1" ' . "\n";
-				$html .= '        begin="0.4s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' .
+                        '<rect x="0" y="0" width="4" height="20">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="7" y="0" width="4" height="20">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="0.2s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="14" y="0" width="4" height="20">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="0.4s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+				        '</svg>';
 				break;
 
 			case 'option_j':
-				$html .= '  <svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' . "\n";
-				$html .= '    <rect x="0" y="10" width="4" height="10" opacity="0.2">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '     <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="8" y="10" width="4" height="10"  opacity="0.2">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '    <rect x="16" y="10" width="4" height="10"  opacity="0.2">' . "\n";
-				$html .= '      <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '      <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' . "\n";
-				$html .= '    </rect>' . "\n";
-				$html .= '  </svg>' . "\n";
+				$html = '<svg class="spl-loading-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">' .
+                        '<rect x="0" y="10" width="4" height="10" opacity="0.2">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="8" y="10" width="4" height="10"  opacity="0.2">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '<rect x="16" y="10" width="4" height="10"  opacity="0.2">' .
+                        '<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' .
+                        '<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />' .
+                        '</rect>' .
+                        '</svg>';
 				break;
 		}
 

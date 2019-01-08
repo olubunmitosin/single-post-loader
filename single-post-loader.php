@@ -18,7 +18,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
-
+require ('includes/ajax_functions.php');
 require ('includes/class-single-post-loader.php');
 require ('includes/class-single-post-loader-settings.php');
 
