@@ -47,27 +47,55 @@ try {
 
     "use strict";
 
+
+    $(document).ready(function () {
+        $('#spl_post_container').html('');
+    });
+
     /**
      * Append dynamically loaded Posts to the top of the loader
      */
     var waypoints = $('#loader-container').waypoint({
         handler: function(direction) {
             if (direction === 'down') {
+                var is_next_post = 0;
+                var postId = '';
                 //make ajax call to fetch next post
-                var postId = $('#loader-container').data('post');
+                if (is_next_post > 0 || typeof  $('#loader-container').data('next') !== 'undefined'){
+                    postId = $('#loader-container').data('next');
+                }else{
+                    postId = $('#loader-container').data('post');
+                }
+                var cat = $('#loader-container').data('category');
                 var data = {
                     action: 'splGetPostTemplate',
                     nonce: spl_ajax_params.nonce,
-                    postID : postId
+                    postID : postId,
+                    category_id : cat
                 };
+
+                console.log(data);
                 $.ajax({
                     url : spl_ajax_params.ajaxUrl,
                     type : 'POST',
                     data : data,
-                    dataType: 'Text',
-                    success : function (resp) {
-                        if ( postId.length > 0 ){
-                            $('#loader-container').before(resp);
+                    dataType: 'json',
+                    success : function (resp, status) {
+                        if ( postId.postID !== '' && status === 'success'){
+                            var container = '<article itemscope="" itemtype="">' +
+                                '<header class="entry-header entry-header-01" style="margin-top: 4em; height: 150px; background: #f5f5f5; padding: 20px !important;">' +
+                                '<div class="entry-before-title">' +
+                                '</div>' +
+                                '<h1 class="g1-mega g1-mega-1st entry-title" itemprop="headline" style="color: #fea620 !important; ">'+ resp.current_post.post_title +'</h1>' +
+                                '</header>' +
+                                '<div class="g1-content-narrow g1-typography-xl entry-content" itemprop="articleBody">' +
+                                resp.current_post.post_content +
+                                '</div>' +
+                                '</article>';
+
+                            $('#spl_post_container').append(container);
+                            is_next_post++;
+                            $('#loader-container').attr('data-next', resp.nextID);
                         }
                     },
                     error : function (error) {
