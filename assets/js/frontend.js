@@ -49,61 +49,118 @@ try {
 
 
     $(document).ready(function () {
-        $('#spl_post_container').html('');
+        window.$is_next = 0;
+        $('.spl_post_container').html('');
+
+        if ($('.spl-btn-container').hasClass('hide')){
+            $('.spl-btn-container').removeClass('hide');
+        }
     });
+    
+    function toggleLoader() {
+        $(document).find('.loader').toggle(400);
+    }
 
     /**
      * Append dynamically loaded Posts to the top of the loader
      */
-    var waypoints = $('#loader-container').waypoint({
-        handler: function(direction) {
-            if (direction === 'down') {
-                var is_next_post = 0;
-                var postId = '';
-                //make ajax call to fetch next post
-                if (is_next_post > 0 || typeof  $('#loader-container').data('next') !== 'undefined'){
-                    postId = $('#loader-container').data('next');
-                }else{
-                    postId = $('#loader-container').data('post');
-                }
-                var cat = $('#loader-container').data('category');
-                var data = {
-                    action: 'splGetPostTemplate',
-                    nonce: spl_ajax_params.nonce,
-                    postID : postId,
-                    category_id : cat
-                };
+    $(document).on('click', '.spl-btn-container', function (e) {
 
-                console.log(data);
-                $.ajax({
-                    url : spl_ajax_params.ajaxUrl,
-                    type : 'POST',
-                    data : data,
-                    dataType: 'json',
-                    success : function (resp, status) {
-                        if ( postId.postID !== '' && status === 'success'){
-                            var container = '<article itemscope="" itemtype="">' +
-                                '<header class="entry-header entry-header-01" style="margin-top: 4em; height: 150px; background: #f5f5f5; padding: 20px !important;">' +
-                                '<div class="entry-before-title">' +
-                                '</div>' +
-                                '<h1 class="g1-mega g1-mega-1st entry-title" itemprop="headline" style="color: #fea620 !important; ">'+ resp.current_post.post_title +'</h1>' +
-                                '</header>' +
-                                '<div class="g1-content-narrow g1-typography-xl entry-content" itemprop="articleBody">' +
-                                resp.current_post.post_content +
-                                '</div>' +
-                                '</article>';
+        toggleLoader();
 
-                            $('#spl_post_container').append(container);
-                            is_next_post++;
-                            $('#loader-container').attr('data-next', resp.nextID);
-                        }
-                    },
-                    error : function (error) {
-                        console.log(error);
-                    }
-                });
-                // console.log(this.element.id + ' hit ' + direction);
-            }
+        var container = $('.spl_post_container');
+
+        var postId = '';
+        //make ajax call to fetch next post
+        if (typeof  container.attr('next') !== 'undefined'){
+            postId = container.attr('next');
+        }else{
+            postId = container.attr('post');
         }
+
+        var cat = container.attr('category');
+
+        var data = {
+            action: 'splGetPostTemplate',
+            nonce: spl_ajax_params.nonce,
+            postID : postId,
+            category_id : cat
+        };
+
+        $.ajax({
+            url : spl_ajax_params.ajaxUrl,
+            type : 'POST',
+            data : data,
+            dataType: 'json',
+            success : function (resp, status) {
+
+                console.log(resp);
+                toggleLoader();
+
+                if ( data.postID !== '' && status === 'success'){
+
+                   if (typeof resp.current_post.post_title !== 'undefined') {
+                       var container = $('.spl_post_container');
+
+                       var template =
+                           '<div class="container main-content">'+
+                           '<div class="row heading-title hentry" data-header-style="default_minimal">'+
+                           '<div class="col span_12 section-title blog-title">'+
+
+                           '<span class="meta-category">'+
+                           '<a class="november-contest" href="http://worddev.com/?cat=23" alt="View all posts in November Contest">November Contest</a>'+
+                           '</span>'+
+                           '<h1 class="entry-title"> '+ resp.current_post.post_title +'</h1>'+
+
+                           '<div id="single-below-header">'+
+                           '<span class="meta-author vcard author"><span class="fn">By <a href="http://worddev.com/?author='+resp.current_post.post_author+'" title="Posts by '+resp.current_post.author+'" rel="author">'+resp.current_post.author+'</a></span></span>'+
+                           '<span class="meta-date date updated">December 4, 2018</span>'+
+                           '<span class="meta-comment-count"><a href="http://worddev.com/?p=32#respond"> No Comments</a></span>'+
+                           '</div><!--/single-below-header-->'+
+
+                           '</div><!--/section-title-->'+
+                           '</div><!--/row-->'+
+
+
+                           '<div class="row">'+
+
+                           '<div class="post-area col standard-minimal span_12 col_last">'+
+                           '<article id="post-32" class="regular post-32 post type-post status-publish format-standard has-post-thumbnail category-november-contest">'+
+
+                           '<div class="inner-wrap animated">'+
+
+                           '<div class="post-content">'+
+
+                           '<div class="content-inner">'+
+
+                           '<span class="post-featured-img">'+ resp.current_post.thumbnail+'</span>'+
+
+                           '<div class="smart_content_wrapper"><p>'+ resp.current_post.post_content + '</p>'+
+                           '</div>'+
+
+                           '</div><!--/content-inner-->'+
+
+                           '</div><!--/post-content-->'+
+
+                           '</div><!--/inner-wrap-->'+
+                           '</article><!--/article-->'+
+                           '</div><!--/span_9-->'+
+                           '</div><!--/row-->'+
+                           '</div>';
+
+                       container.append(template);
+
+                       setTimeout(function () {
+                           container.attr('next', resp.nextID);
+                       }, 300);
+                   }else {
+                       return false;
+                   }
+                }
+            },
+            error : function (error) {
+                //
+            }
+        });
     });
 }(jQuery));
